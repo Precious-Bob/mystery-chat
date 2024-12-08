@@ -3,6 +3,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import * as argon from 'argon2';
 import { JwtService } from '@nestjs/jwt';
@@ -73,5 +74,24 @@ export class AuthService {
       access_token: accessToken,
       refresh_token: refreshToken,
     };
+  }
+
+  async refreshToken(
+    token: string,
+  ): Promise<{ access_token: string; refresh_token: string }> {
+    try {
+      const payload = await this.jwt.verifyAsync(token, {
+        secret: this.config.get('JWT_REFRESH_SECRET'),
+      });
+
+      const user = await this.userRepo.findOne({ where: { id: payload.sub } });
+      if (!user) {
+        throw new UnauthorizedException('User not found');
+      }
+
+      return this.signToken(user.id, user.email);
+    } catch (e) {
+      throw new UnauthorizedException('Invalid refresh token', e);
+    }
   }
 }
