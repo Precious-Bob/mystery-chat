@@ -30,7 +30,8 @@ export class AuthService {
       dto.password = await argon.hash(dto.password);
       const user = this.userRepo.create(dto);
       await user.save();
-      return this.signToken(user.id, user.email);
+      const token = await this.signToken(user.id, user.email);
+      return { message: 'Successfully signed up', token };
     } catch (e) {
       if (e.code === '23505') {
         throw new ConflictException('Credentials alredy exists!');
@@ -46,7 +47,8 @@ export class AuthService {
 
       const validPassword = await argon.verify(user.password, password);
       if (!validPassword) throw new NotFoundException('Credentials incorrect');
-      return this.signToken(user.id, user.email);
+      const token = await this.signToken(user.id, user.email);
+      return { message: 'Successfully signed in', token };
     } catch (e) {
       throw e;
     }
