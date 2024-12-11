@@ -12,6 +12,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserEntity } from 'src/entities/user.entity';
 import { SigninDto, SignupDto } from 'src/dto';
+import { EmailService } from 'src/email/email.service';
 
 @Injectable()
 export class AuthService {
@@ -20,6 +21,7 @@ export class AuthService {
     private readonly config: ConfigService,
     @InjectRepository(UserEntity)
     private readonly userRepo: Repository<UserEntity>,
+    private readonly emailservice: EmailService,
   ) {}
 
   async signup(dto: SignupDto) {
@@ -31,6 +33,7 @@ export class AuthService {
       const user = this.userRepo.create(dto);
       await user.save();
       const token = await this.signToken(user.id, user.email);
+      await this.emailservice.sendWelcomeMail(user);
       return { message: 'Successfully signed up', token };
     } catch (e) {
       if (e.code === '23505') {

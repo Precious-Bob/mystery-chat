@@ -1,47 +1,32 @@
+import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
-import { SendEmailDto } from 'src/dto';
+import { UserEntity } from 'src/entities/user.entity';
 
 @Injectable()
 export class EmailService {
-  constructor(private readonly config: ConfigService) {}
+  constructor(
+    private readonly config: ConfigService,
+    private readonly mailerService: MailerService,
+  ) {}
 
-  // Create a memoized transporter to improve performance
-  private transporterInstance: nodemailer.Transporter | null = null;
-
-  private createTransporter(): nodemailer.Transporter {
-    if (this.transporterInstance) {
-      return this.transporterInstance;
-    }
-
-    this.transporterInstance = nodemailer.createTransport({
-      host: this.config.getOrThrow('EMAIL_HOST'),
-      port: this.config.getOrThrow('EMAIL_PORT'),
-      secure: this.config.get('EMAIL_SECURE', false), // true for port 465, false for other ports
-      auth: {
-        user: this.config.getOrThrow('EMAIL_USER'),
-        pass: this.config.getOrThrow('EMAIL_PASS'),
-      },
-    });
-    return this.transporterInstance;
-  }
-
-  async sendMail(dto: SendEmailDto) {
-    const { recipients, subject, html } = dto;
-    const transport = this.createTransporter();
-
+  async sendWelcomeMail(user: UserEntity) {
     const options: nodemailer.SendMailOptions = {
       from: {
         name: this.config.get('EMAIL_FROM'),
         address: this.config.get('EMAIL_ADDRESS'),
       },
-      to: recipients,
-      subject,
-      html,
+      to: user.email,
+      subject: 'Welcome to Mystery Chat',
+      template: 'welcome',
+      context: {
+        username: user.username,
+      },
     };
 
-    const result = await transport.sendMail(options);
+    const result = await this.mailerService.sendMail(options);
+
     try {
       return result;
     } catch (error) {

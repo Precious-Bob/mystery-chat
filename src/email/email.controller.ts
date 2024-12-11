@@ -1,17 +1,16 @@
-import { Body, Controller, Post } from '@nestjs/common';
-import { EmailService } from './email.service';
-import { SendEmailDto } from 'src/dto';
+// import { Body, Controller, Post } from '@nestjs/common';
+// import { EmailService } from './email.service';
 
-@Controller('email')
-export class EmailController {
-  constructor(private readonly emailService: EmailService) {}
+// @Controller('email')
+// export class EmailController {
+//   constructor(private readonly emailService: EmailService) {}
 
-  @Post('send')
-  async sendEmail(@Body() dto: SendEmailDto) {
-    const result = await this.emailService.sendMail(dto);
-    return {
-      message: 'Email sent successfully',
-      messageId: result?.messageId,
-    };
-  }
-}
+//   @Post('send')
+//   async sendEmail() {
+//     const result = await this.emailService.sendWelcomeMail(user);
+//     return {
+//       message: 'Email sent successfully',
+//       messageId: result?.messageId,
+//     };
+//   }
+// }
