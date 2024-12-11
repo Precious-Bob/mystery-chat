@@ -40,7 +40,6 @@ export class EmailService {
       subject,
       html,
     };
-    console.log(options);
 
     const result = await transport.sendMail(options);
     try {
