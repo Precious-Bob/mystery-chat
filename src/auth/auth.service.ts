@@ -11,7 +11,7 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserEntity } from 'src/entities/user.entity';
-import { SigninDto, SignupDto } from 'src/dto';
+import { SigninDto, SignupDto, ForgotPasswordDto } from 'src/dto';
 import { EmailService } from 'src/email/email.service';
 
 @Injectable()
@@ -55,6 +55,31 @@ export class AuthService {
     } catch (e) {
       throw e;
     }
+  }
+
+  async forgotPassword({ email }: ForgotPasswordDto): Promise<void> {
+    const user = await this.userRepo.findOne({ where: { email } });
+    if (!user) throw new NotFoundException('credentials incorrect');
+
+    // Generate reset token
+    const resetToken = this.jwt.signAsync(
+      { userId: user.id, email: user.email },
+      {
+        expiresIn: '1800',
+        secret: this.config.get('JWT_RESET_SECRET'),
+      },
+    );
+
+    // Save reset token to user entity
+    user.resetToken = await resetToken;
+    await this.userRepo.save(user);
+
+    // Send email with reset link
+    // const resetLink = `http://your-app.com/reset-password/${resetToken}`;
+    const resetLink = `http://localhost:3000/reset-password/${resetToken}`;
+
+    // Implement email sending logic here
+    await this.emailservice.sendResetPasswordMail(user, resetLink);
   }
 
   async signToken(

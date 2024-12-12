@@ -16,4 +16,10 @@ export class UserEntity extends AbstractEntity {
 
   @Column({ nullable: true })
   profileLink: string | null;
+
+  @Column({ nullable: true })
+  resetToken: string;
+
+  @Column({ nullable: true })
+  resetTokenExpires: Date;
 }
