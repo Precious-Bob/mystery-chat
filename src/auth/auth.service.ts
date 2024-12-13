@@ -18,6 +18,7 @@ import {
   ResetPasswordDto,
 } from 'src/dto';
 import { EmailService } from 'src/email/email.service';
+import { ProfileLinkGenerator } from 'src/user/profileLink.service';
 
 @Injectable()
 export class AuthService {
@@ -27,6 +28,7 @@ export class AuthService {
     @InjectRepository(UserEntity)
     private readonly userRepo: Repository<UserEntity>,
     private readonly emailservice: EmailService,
+    private readonly plg: ProfileLinkGenerator,
   ) {}
 
   async signup(dto: SignupDto) {
@@ -35,10 +37,18 @@ export class AuthService {
         throw new BadRequestException('Passwords do not match!');
       }
       dto.password = await argon.hash(dto.password);
-      const user = this.userRepo.create(dto);
+      // Generate unique profile link
+      const profileLink = await this.plg.generate(dto.username);
+
+      const user = this.userRepo.create({
+        ...dto,
+        profileLink,
+      });
       await user.save();
+
       const token = await this.signToken(user.id, user.email);
       await this.emailservice.sendWelcomeMail(user);
+      console.log({ user });
       return { message: 'Successfully signed up', token };
     } catch (e) {
       if (e.code === '23505') {

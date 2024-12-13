@@ -1,7 +1,9 @@
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
 
+@Injectable()
 export class ProfileLinkGenerator {
   constructor(
     @InjectRepository(UserEntity)
@@ -16,10 +18,9 @@ export class ProfileLinkGenerator {
       .replace(/[^a-z0-9]/g, '')
       .substring(0, 10);
 
+    // Ensure link is unique (there's probably no way an ununique username is getting past the dto validation shar)
     let profileLink = sanitizedBase;
     let counter = 1;
-
-    // Ensure link is unique
     while (await this.isProfileLinkTaken(profileLink)) {
       profileLink = `${sanitizedBase}${counter}`;
       counter++;
