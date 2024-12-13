@@ -6,12 +6,17 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import * as argon from 'argon2';
-import { JwtService } from '@nestjs/jwt';
+import { JwtService, TokenExpiredError } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserEntity } from 'src/entities/user.entity';
-import { SigninDto, SignupDto, ForgotPasswordDto } from 'src/dto';
+import {
+  SigninDto,
+  SignupDto,
+  ForgotPasswordDto,
+  ResetPasswordDto,
+} from 'src/dto';
 import { EmailService } from 'src/email/email.service';
 
 @Injectable()
@@ -62,24 +67,51 @@ export class AuthService {
     if (!user) throw new NotFoundException('credentials incorrect');
 
     // Generate reset token
-    const resetToken = this.jwt.signAsync(
+    const resetToken = await this.jwt.signAsync(
       { userId: user.id, email: user.email },
       {
-        expiresIn: '1800',
+        expiresIn: '30m',
         secret: this.config.get('JWT_RESET_SECRET'),
       },
     );
 
     // Save reset token to user entity
-    user.resetToken = await resetToken;
+    user.resetToken = resetToken;
+    user.resetTokenExpires = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes from now
     await this.userRepo.save(user);
 
     // Send email with reset link
-    // const resetLink = `http://your-app.com/reset-password/${resetToken}`;
     const resetLink = `http://localhost:3000/reset-password/${resetToken}`;
 
-    // Implement email sending logic here
+    // Implement email sending logic
     await this.emailservice.sendResetPasswordMail(user, resetLink);
+    console.log(resetLink);
+  }
+
+  async resetPassword({ token, newPassword }: ResetPasswordDto) {
+    try {
+      // Verify the token
+      const decoded = this.jwt.verify(token, {
+        secret: this.config.get('JWT_RESET_SECRET'),
+      });
+
+      // Check if the token is valid (email)
+      const user = await this.userRepo.findOne({
+        where: { email: decoded.email },
+      });
+
+      if (!user) throw new NotFoundException('Credentials incorrect');
+
+      user.password = await argon.hash(newPassword);
+      await this.userRepo.save(user);
+
+      return { message: 'Successfully reset password' };
+    } catch (e) {
+      if (e instanceof TokenExpiredError) {
+        throw new UnauthorizedException('Reset token has expired');
+      }
+      throw new Error(e);
+    }
   }
 
   async signToken(
