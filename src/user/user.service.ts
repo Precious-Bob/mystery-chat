@@ -1,10 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly userRepo: Repository<UserEntity>) {}
+  constructor(
+    @InjectRepository(UserEntity)
+    private readonly userRepo: Repository<UserEntity>,
+    private readonly config: ConfigService,
+  ) {}
 
   async createUser() {
     return {
@@ -13,14 +19,21 @@ export class UserService {
     };
   }
 
-  async getByProfileLink(profileLink: string) {
+  async getByProfile(id: string) {
     try {
-      const data = await this.userRepo.findOne({
-        where: { profileLink },
-        select: ['id', 'profileLink', 'email', 'username'],
+      const user = await this.userRepo.findOne({
+        where: { id },
+        select: ['profileSlugOrLink', 'email', 'username'],
       });
-      if (!data) throw new NotFoundException('profile not found!');
-      return { message: 'successful', data };
+
+      if (user) {
+        const baseURL = this.config.get('DEV_APP_URL');
+        const profileLink = `${baseURL}${user.profileSlugOrLink}`;
+        user.profileSlugOrLink = profileLink;
+      } else {
+        throw new NotFoundException('profile not found!');
+      }
+      return { message: 'successful', user };
     } catch (e) {
       throw e;
     }

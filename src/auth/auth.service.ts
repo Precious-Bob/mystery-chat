@@ -18,7 +18,7 @@ import {
   ResetPasswordDto,
 } from 'src/dto';
 import { EmailService } from 'src/email/email.service';
-import { ProfileLinkGenerator } from 'src/user/profileLink.service';
+import { ProfileLinkGenerator } from 'src/user/profileSlug.service';
 
 @Injectable()
 export class AuthService {
@@ -38,11 +38,11 @@ export class AuthService {
       }
       dto.password = await argon.hash(dto.password);
       // Generate unique profile link
-      const profileLink = await this.plg.generate(dto.username);
+      const profileSlug = await this.plg.generate(dto.username);
 
       const user = this.userRepo.create({
         ...dto,
-        profileLink,
+        profileSlug,
       });
       await user.save();
 

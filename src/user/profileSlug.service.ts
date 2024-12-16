@@ -2,14 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
-import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class ProfileLinkGenerator {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepo: Repository<UserEntity>,
-    private readonly config: ConfigService,
   ) {}
 
   // Generate unique profile link
@@ -21,20 +19,19 @@ export class ProfileLinkGenerator {
       .substring(0, 10);
 
     // Ensure link is unique (there's probably no way an ununique username is getting past the dto validation shar)
-    let profileLink = sanitizedBase;
+    let profileSlug = sanitizedBase;
     let counter = 1;
-    while (await this.isProfileLinkTaken(profileLink)) {
-      profileLink = `${sanitizedBase}${counter}`;
+    while (await this.isProfileSlugTaken(profileSlug)) {
+      profileSlug = `${sanitizedBase}${counter}`;
       counter++;
     }
-    const baseUrl = this.config.get('DEV_APP_URL');
-    return `${baseUrl}/${profileLink}`;
+    return profileSlug;
   }
 
   // Check if profile link already exists
-  private async isProfileLinkTaken(profileLink: string): Promise<boolean> {
+  private async isProfileSlugTaken(profileSlug: string): Promise<boolean> {
     const existingUser = await this.userRepo.findOne({
-      where: { profileLink },
+      where: { profileSlug },
     });
     return !!existingUser;
   }
