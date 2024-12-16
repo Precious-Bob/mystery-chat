@@ -78,7 +78,7 @@ export class AuthService {
 
     // Generate reset token
     const resetToken = await this.jwt.signAsync(
-      { userId: user.id, email: user.email },
+      { sub: user.id, email: user.email },
       {
         expiresIn: '30m',
         secret: this.config.get('JWT_RESET_SECRET'),

@@ -2,12 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class ProfileLinkGenerator {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepo: Repository<UserEntity>,
+    private readonly config: ConfigService,
   ) {}
 
   // Generate unique profile link
@@ -25,8 +27,8 @@ export class ProfileLinkGenerator {
       profileLink = `${sanitizedBase}${counter}`;
       counter++;
     }
-
-    return profileLink;
+    const baseUrl = this.config.get('DEV_APP_URL');
+    return `${baseUrl}/${profileLink}`;
   }
 
   // Check if profile link already exists
