@@ -38,4 +38,9 @@ export class UserService {
       throw e;
     }
   }
+
+  async getAllUsers() {
+    const data = await this.userRepo.find();
+    return { message: 'success', length: data.length, data };
+  }
 }
