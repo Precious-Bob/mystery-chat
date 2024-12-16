@@ -29,9 +29,11 @@ export class ProfileLinkGenerator {
   }
 
   // Check if profile link already exists
-  private async isProfileSlugTaken(profileSlug: string): Promise<boolean> {
+  private async isProfileSlugTaken(
+    profileSlugOrLink: string,
+  ): Promise<boolean> {
     const existingUser = await this.userRepo.findOne({
-      where: { profileSlug },
+      where: { profileSlugOrLink },
     });
     return !!existingUser;
   }

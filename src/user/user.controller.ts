@@ -1,5 +1,6 @@
-import { Controller, Post, Request } from '@nestjs/common';
+import { Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
 
 @Controller('user')
 export class UserController {
@@ -10,8 +11,9 @@ export class UserController {
     return this.userService.createUser();
   }
 
-  async getProfile(@Request() req) {
-    const data = req.user;
-    return data;
+  @UseGuards(AuthGuard)
+  @Get('me')
+  async getMe(@Request() req) {
+    return this.userService.getByProfile(req.user.id);
   }
 }

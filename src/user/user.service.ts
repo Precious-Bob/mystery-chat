@@ -21,19 +21,19 @@ export class UserService {
 
   async getByProfile(id: string) {
     try {
-      const user = await this.userRepo.findOne({
+      const data = await this.userRepo.findOne({
         where: { id },
         select: ['profileSlugOrLink', 'email', 'username'],
       });
 
-      if (user) {
+      if (data) {
         const baseURL = this.config.get('DEV_APP_URL');
-        const profileLink = `${baseURL}${user.profileSlugOrLink}`;
-        user.profileSlugOrLink = profileLink;
-      } else {
-        throw new NotFoundException('profile not found!');
+        const profileLink = `${baseURL}${data.profileSlugOrLink}`;
+        data.profileSlugOrLink = profileLink;
       }
-      return { message: 'successful', user };
+
+      if (!data) throw new NotFoundException('profile not found!');
+      return { message: 'successful', data };
     } catch (e) {
       throw e;
     }
