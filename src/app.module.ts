@@ -6,6 +6,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
 import { UserModule } from './user/user.module';
+import { MessageModule } from './message/message.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { UserModule } from './user/user.module';
     AuthModule,
     EmailModule,
     UserModule,
+    MessageModule,
   ],
   controllers: [AppController],
   providers: [AppService],

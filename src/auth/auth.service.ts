@@ -48,7 +48,6 @@ export class AuthService {
 
       const token = await this.signToken(user.id, user.email);
       await this.emailservice.sendWelcomeMail(user);
-      console.log({ user });
       return { message: 'Successfully signed up', token };
     } catch (e) {
       if (e.code === '23505') {
