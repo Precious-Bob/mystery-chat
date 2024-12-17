@@ -15,7 +15,7 @@ export class UserEntity extends AbstractEntity {
   password: string;
 
   @Column({ nullable: true })
-  profileLink: string | null;
+  profileSlugOrLink: string | null;
 
   @Column({ nullable: true })
   resetToken: string;
