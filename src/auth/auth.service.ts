@@ -44,7 +44,7 @@ export class AuthService {
         ...dto,
         profileSlugOrLink,
       });
-      await user.save();
+      await this.userRepo.save(user);
 
       const token = await this.signToken(user.id, user.email);
       await this.emailservice.sendWelcomeMail(user);
