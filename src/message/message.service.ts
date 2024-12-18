@@ -41,8 +41,19 @@ export class MessageService {
     });
 
     const data = await this.messageRepo.save(msg);
+    const msgResponse = {
+      message: 'success',
+      id: data.id,
+      content: data.content,
+      createdAt: data.createdAt,
+      recipient: {
+        id: data.recipient.id,
+        username: data.recipient.username,
+        profileSlugOrLink: data.recipient.profileSlugOrLink,
+      },
+    };
 
-    return { message: 'success', data };
+    return { message: 'success', data: msgResponse };
   }
 }
 
