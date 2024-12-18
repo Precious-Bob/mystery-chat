@@ -19,7 +19,7 @@ export class UserService {
     };
   }
 
-  async getByProfile(id: string) {
+  async getById(id: string) {
     try {
       const data = await this.userRepo.findOne({
         where: { id },

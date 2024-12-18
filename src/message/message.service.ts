@@ -1,6 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { sendMessageDto } from 'src/dto';
 import { MessageEntity } from 'src/entities/message.entity';
 import { UserEntity } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
@@ -15,12 +18,16 @@ export class MessageService {
   ) {}
 
   // recipient = recipientProfileSlug
-  async sendMessage({ recipientSlug, content }: sendMessageDto) {
+  async sendMessage(profileSlugOrLink: string, content: string) {
     const recipient = await this.userRepo.findOne({
-      where: { profileSlugOrLink: recipientSlug },
+      where: { profileSlugOrLink },
     });
 
     if (!recipient) throw new NotFoundException('Recipient not found');
+
+    // Validate message content
+    if (!content || content.trim().length === 0)
+      throw new BadRequestException('Message content cannot be empty');
 
     // Create and save message
     const msg = this.messageRepo.create({
@@ -32,3 +39,5 @@ export class MessageService {
     return { message: 'success', data };
   }
 }
+
+//write controller and test endpoint

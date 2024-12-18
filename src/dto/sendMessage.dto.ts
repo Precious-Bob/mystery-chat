@@ -6,8 +6,4 @@ export class sendMessageDto {
   @MinLength(1)
   @MaxLength(500)
   content: string;
-
-  @IsNotEmpty()
-  @IsString()
-  recipientSlug: string;
 }
