@@ -29,6 +29,11 @@ export class MessageService {
     if (!content || content.trim().length === 0)
       throw new BadRequestException('Message content cannot be empty');
 
+    if (content.trim().length > 500)
+      throw new BadRequestException(
+        'Message content cannot be longer than 500 characters',
+      );
+
     // Create and save message
     const msg = this.messageRepo.create({
       content,
@@ -36,6 +41,7 @@ export class MessageService {
     });
 
     const data = await this.messageRepo.save(msg);
+
     return { message: 'success', data };
   }
 }
