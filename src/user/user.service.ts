@@ -39,7 +39,7 @@ export class UserService {
     }
   }
 
-  //test
+  //pagination
   async getAllUsers() {
     const data = await this.userRepo.find();
     return { message: 'success', length: data.length, data };

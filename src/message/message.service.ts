@@ -55,6 +55,14 @@ export class MessageService {
 
     return { message: 'success', data: msgResponse };
   }
-}
 
-//write controller and test endpoint
+  //pagination
+  async getInbox(id: string) {
+    const messages = await this.messageRepo.find({
+      where: { recipient: { id } },
+      order: { createdAt: 'DESC' },
+    });
+    const msg = messages.length > 0 ? 'Messages retrieved' : 'No messages yet';
+    return { message: 'success', length: messages.length, data: msg };
+  }
+}
