@@ -26,7 +26,7 @@ import { MessageModule } from './message/message.module';
         database: config.get('POSTGRES_DB'),
         autoLoadEntities: true,
         synchronize: true,
-        dropSchema: true,
+        // dropSchema: true,
         logging: ['query', 'error', 'schema'],
       }),
     }),

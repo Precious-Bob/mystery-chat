@@ -34,7 +34,6 @@ export class MessageService {
         'Message content cannot be longer than 500 characters',
       );
 
-    // Create and save message
     const msg = this.messageRepo.create({
       content,
       recipient,
@@ -65,4 +64,18 @@ export class MessageService {
     const msg = messages.length > 0 ? 'Messages retrieved' : 'No messages yet';
     return { message: 'success', length: messages.length, data: msg };
   }
+
+  // async deleteMessage(messageId: string, userId: string) {
+  //   const message = await this.messageRepo.findOne({
+  //     where: { id: messageId, recipientId: userId },
+  //   });
+
+  //   if (!message) {
+  //     throw new BadRequestException(
+  //       'Message not found or you do not have permission',
+  //     );
+  //   }
+
+  //   await this.messageRepo.remove(message);
+  // }
 }

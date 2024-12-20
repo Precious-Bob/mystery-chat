@@ -165,4 +165,9 @@ export class AuthService {
       throw new UnauthorizedException('Invalid refresh token', e);
     }
   }
+
+  // async logout(token: string) {
+  //   // Implement token blacklist logic
+  //   return { message: 'Successfully logged out' };
+  // }
 }
