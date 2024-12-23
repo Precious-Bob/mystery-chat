@@ -3,7 +3,6 @@ import { UserService } from './user.service';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { User } from 'src/decorators/user.decorator';
 import { UserEntity } from 'src/entities/user.entity';
-import { paginationDto } from 'src/dto';
 
 @Controller('users')
 export class UserController {
@@ -16,7 +15,10 @@ export class UserController {
 
   @UseGuards(AuthGuard)
   @Get()
-  async getAllUsers(@Query() dto: paginationDto) {
+  async getAllUsers(
+    @Query('page') page: number,
+    @Query('limit') limit: number,
+  ) {
     return await this.userService.getAllUsers(page, limit);
   }
 
