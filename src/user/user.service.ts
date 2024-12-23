@@ -40,8 +40,35 @@ export class UserService {
   }
 
   //pagination
-  async getAllUsers() {
-    const data = await this.userRepo.find();
-    return { message: 'success', length: data.length, data };
+  async getAllUsers(page = 1, limit = 10) {
+    const offset = (page - 1) * limit;
+    const [data, total] = await this.userRepo.findAndCount({
+      skip: offset,
+      take: limit,
+    });
+    return {
+      data,
+      total,
+      page,
+      limit,
+    };
   }
+
+  // private createPaginationLinks(
+  //   page: number,
+  //   limit: number,
+  //   total: number,
+  //   baseUrl: string = '/books',
+  // ) {
+  //   const totalPages = Math.ceil(total / limit);
+  //   const createLink = (targetPage: number) =>
+  //     `${baseUrl}?page=${targetPage}&limit=${limit}`;
+
+  //   return {
+  //     first: createLink(1),
+  //     prev: page > 1 ? createLink(page - 1) : null,
+  //     next: page < totalPages ? createLink(page + 1) : null,
+  //     last: createLink(totalPages),
+  //   };
+  // }
 }

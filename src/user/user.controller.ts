@@ -1,8 +1,9 @@
-import { Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { User } from 'src/decorators/user.decorator';
 import { UserEntity } from 'src/entities/user.entity';
+import { paginationDto } from 'src/dto';
 
 @Controller('users')
 export class UserController {
@@ -15,8 +16,8 @@ export class UserController {
 
   @UseGuards(AuthGuard)
   @Get()
-  async getAllUsers() {
-    return await this.userService.getAllUsers();
+  async getAllUsers(@Query() dto: paginationDto) {
+    return await this.userService.getAllUsers(page, limit);
   }
 
   @UseGuards(AuthGuard)
