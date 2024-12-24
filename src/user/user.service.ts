@@ -41,34 +41,27 @@ export class UserService {
 
   //pagination
   async getAllUsers(page = 1, limit = 10) {
-    const offset = (page - 1) * limit;
     const [data, total] = await this.userRepo.findAndCount({
-      skip: offset,
+      skip: page > 0 ? (page - 1) * limit : 0,
       take: limit,
     });
+    const links = this.createPaginationLinks(page, limit, total);
     return {
-      data,
       total,
       page,
       limit,
+      data,
+      links,
     };
   }
 
-  // private createPaginationLinks(
-  //   page: number,
-  //   limit: number,
-  //   total: number,
-  //   baseUrl: string = '/books',
-  // ) {
-  //   const totalPages = Math.ceil(total / limit);
-  //   const createLink = (targetPage: number) =>
-  //     `${baseUrl}?page=${targetPage}&limit=${limit}`;
-
-  //   return {
-  //     first: createLink(1),
-  //     prev: page > 1 ? createLink(page - 1) : null,
-  //     next: page < totalPages ? createLink(page + 1) : null,
-  //     last: createLink(totalPages),
-  //   };
-  // }
+  private createPaginationLinks(page: number, limit: number, total: number) {
+    const totalPages = Math.ceil(total / limit);
+    return {
+      first: `/users?page=1&limit=${limit}`,
+      prev: page > 1 ? `/users?page=${page - 1}&limit=${limit}` : null,
+      next: page < totalPages ? `/users?page=${page + 1}&limit=${limit}` : null,
+      last: `/users?page=${totalPages}&limit=${limit}`,
+    };
+  }
 }
