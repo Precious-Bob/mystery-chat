@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
+import { createPaginationLinks } from 'src/utils/paginationLink.util';
 
 @Injectable()
 export class UserService {
@@ -45,23 +46,13 @@ export class UserService {
       skip: page > 0 ? (page - 1) * limit : 0,
       take: limit,
     });
-    const links = this.createPaginationLinks(page, limit, total);
+    const links = createPaginationLinks(page, limit, total, 'users');
     return {
       total,
       page,
       limit,
       data,
       links,
-    };
-  }
-
-  private createPaginationLinks(page: number, limit: number, total: number) {
-    const totalPages = Math.ceil(total / limit);
-    return {
-      first: `/users?page=1&limit=${limit}`,
-      prev: page > 1 ? `/users?page=${page - 1}&limit=${limit}` : null,
-      next: page < totalPages ? `/users?page=${page + 1}&limit=${limit}` : null,
-      last: `/users?page=${totalPages}&limit=${limit}`,
     };
   }
 }
