@@ -40,7 +40,6 @@ export class UserService {
     }
   }
 
-  //pagination
   async getAllUsers(page = 1, limit = 10) {
     const [data, total] = await this.userRepo.findAndCount({
       skip: page > 0 ? (page - 1) * limit : 0,

@@ -6,6 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { MessageEntity } from 'src/entities/message.entity';
 import { UserEntity } from 'src/entities/user.entity';
+import { createPaginationLinks } from 'src/utils/paginationLink.util';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -56,13 +57,30 @@ export class MessageService {
   }
 
   //pagination
-  async getInbox(id: string) {
-    const messages = await this.messageRepo.find({
+  async getInbox(id: string, page = 1, limit = 10) {
+    // const messages = await this.messageRepo.find({
+    //   where: { recipient: { id } },
+    //   order: { createdAt: 'DESC' },
+    // });
+    // const msg = messages.length > 0 ? 'Messages retrieved' : 'No messages yet';
+    // return { message: 'success', length: messages.length, data: msg };
+
+    const [data, total] = await this.messageRepo.findAndCount({
       where: { recipient: { id } },
       order: { createdAt: 'DESC' },
+      skip: page > 0 ? (page - 1) * limit : 0,
+      take: limit,
     });
-    const msg = messages.length > 0 ? 'Messages retrieved' : 'No messages yet';
-    return { message: 'success', length: messages.length, data: msg };
+    const msg = total > 0 ? 'Messages retrieved' : 'No messages yet';
+    const links = createPaginationLinks(page, limit, total, 'messages');
+    return {
+      total,
+      page,
+      limit,
+      msg,
+      data,
+      links,
+    };
   }
 
   // async deleteMessage(messageId: string, userId: string) {
