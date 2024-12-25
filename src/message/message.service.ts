@@ -8,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { MessageEntity } from 'src/entities/message.entity';
 import { UserEntity } from 'src/entities/user.entity';
 import { createPaginationLinks } from 'src/utils/paginationLink.util';
-import { QueryResult, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class MessageService {
@@ -56,27 +56,21 @@ export class MessageService {
     return { message: 'success', data: msgResponse };
   }
 
-  //pagination
   async getInbox(userId: string, page = 1, limit = 10) {
-    console.log('Service received userId:', userId); // New log
-    if (!userId) {
-      throw new UnauthorizedException('User ID is required');
-    }
-    console.log('User ID being queried:', userId);
+    if (!userId) throw new UnauthorizedException('User ID is required');
+
     const [data, total] = await this.messageRepo.findAndCount({
       where: {
-        recipient: { id: userId }, // Make sure we're using the correct field name
+        recipient: { id: userId },
       },
       order: { createdAt: 'DESC' },
       skip: page > 0 ? (page - 1) * limit : 0,
       take: limit,
     });
 
-    console.log('Raw query result:', QueryResult); // New log
-
     const msg = total > 0 ? 'Messages retrieved' : 'No messages yet';
     const links = createPaginationLinks(page, limit, total, 'messages');
-    const response = {
+    return {
       total,
       page,
       limit,
@@ -84,22 +78,5 @@ export class MessageService {
       data,
       links,
     };
-
-    console.log('Final response:', response); // New log
-    return response;
   }
-
-  // async deleteMessage(messageId: string, userId: string) {
-  //   const message = await this.messageRepo.findOne({
-  //     where: { id: messageId, recipientId: userId },
-  //   });
-
-  //   if (!message) {
-  //     throw new BadRequestException(
-  //       'Message not found or you do not have permission',
-  //     );
-  //   }
-
-  //   await this.messageRepo.remove(message);
-  // }
 }

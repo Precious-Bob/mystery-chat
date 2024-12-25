@@ -26,14 +26,11 @@ export class MessageController {
   @Get('myInbox')
   @UseGuards(AuthGuard)
   async getInbox(@User() user: any) {
-    console.log('Complete user object :', user);
     const userId = user.sub;
-    console.log('Extracted userId:', userId); // New log
     if (!userId) {
       throw new UnauthorizedException('User ID is missing');
     }
     const result = await this.messageService.getInbox(userId);
-    console.log('Service returned:', result); // New log
     return result;
   }
 }
