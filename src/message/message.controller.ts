@@ -1,8 +1,15 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  UnauthorizedException,
+  UseGuards,
+} from '@nestjs/common';
 import { MessageService } from './message.service';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { User } from 'src/decorators/user.decorator';
-import { UserEntity } from 'src/entities/user.entity';
 
 @Controller('messages')
 export class MessageController {
@@ -18,7 +25,15 @@ export class MessageController {
 
   @Get('myInbox')
   @UseGuards(AuthGuard)
-  async getInbox(@User() user: UserEntity) {
-    return await this.messageService.getInbox(user.id);
+  async getInbox(@User() user: any) {
+    console.log('Complete user object :', user);
+    const userId = user.sub;
+    console.log('Extracted userId:', userId); // New log
+    if (!userId) {
+      throw new UnauthorizedException('User ID is missing');
+    }
+    const result = await this.messageService.getInbox(userId);
+    console.log('Service returned:', result); // New log
+    return result;
   }
 }

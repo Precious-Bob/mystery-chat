@@ -2,12 +2,13 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MessageEntity } from 'src/entities/message.entity';
 import { UserEntity } from 'src/entities/user.entity';
 import { createPaginationLinks } from 'src/utils/paginationLink.util';
-import { Repository } from 'typeorm';
+import { QueryResult, Repository } from 'typeorm';
 
 @Injectable()
 export class MessageService {
@@ -42,7 +43,6 @@ export class MessageService {
 
     const data = await this.messageRepo.save(msg);
     const msgResponse = {
-      message: 'success',
       id: data.id,
       content: data.content,
       createdAt: data.createdAt,
@@ -57,23 +57,26 @@ export class MessageService {
   }
 
   //pagination
-  async getInbox(id: string, page = 1, limit = 10) {
-    // const messages = await this.messageRepo.find({
-    //   where: { recipient: { id } },
-    //   order: { createdAt: 'DESC' },
-    // });
-    // const msg = messages.length > 0 ? 'Messages retrieved' : 'No messages yet';
-    // return { message: 'success', length: messages.length, data: msg };
-
+  async getInbox(userId: string, page = 1, limit = 10) {
+    console.log('Service received userId:', userId); // New log
+    if (!userId) {
+      throw new UnauthorizedException('User ID is required');
+    }
+    console.log('User ID being queried:', userId);
     const [data, total] = await this.messageRepo.findAndCount({
-      where: { recipient: { id } },
+      where: {
+        recipient: { id: userId }, // Make sure we're using the correct field name
+      },
       order: { createdAt: 'DESC' },
       skip: page > 0 ? (page - 1) * limit : 0,
       take: limit,
     });
+
+    console.log('Raw query result:', QueryResult); // New log
+
     const msg = total > 0 ? 'Messages retrieved' : 'No messages yet';
     const links = createPaginationLinks(page, limit, total, 'messages');
-    return {
+    const response = {
       total,
       page,
       limit,
@@ -81,6 +84,9 @@ export class MessageService {
       data,
       links,
     };
+
+    console.log('Final response:', response); // New log
+    return response;
   }
 
   // async deleteMessage(messageId: string, userId: string) {

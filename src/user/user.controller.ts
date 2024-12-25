@@ -22,6 +22,8 @@ export class UserController {
     return await this.userService.getAllUsers(page, limit);
   }
 
+  //getuserbyidendpoint
+
   @UseGuards(AuthGuard)
   @Get('me')
   async getMe(@User() user: UserEntity) {
