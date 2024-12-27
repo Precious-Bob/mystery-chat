@@ -79,4 +79,19 @@ export class MessageService {
       links,
     };
   }
+  async deleteMessage(msgId: string, userId: string) {
+    const message = await this.messageRepo.findOne({
+      where: {
+        id: msgId,
+        recipient: { id: userId },
+      },
+      relations: ['recipient'],
+    });
+
+    if (!message)
+      throw new NotFoundException(
+        `Message not found or you don't have permission to delete it!`,
+      );
+    await this.messageRepo.remove(message);
+  }
 }

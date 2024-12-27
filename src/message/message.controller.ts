@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -32,5 +33,12 @@ export class MessageController {
     }
     const result = await this.messageService.getInbox(userId);
     return result;
+  }
+
+  @UseGuards(AuthGuard)
+  @Delete(':id')
+  async deleteMessage(@Param('id') id: string, @User() user: any) {
+    await this.messageService.deleteMessage(id, user.sub);
+    return { message: 'Message deleted successfully' };
   }
 }
