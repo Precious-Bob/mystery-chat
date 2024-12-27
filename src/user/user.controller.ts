@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { User } from 'src/decorators/user.decorator';
@@ -22,11 +22,15 @@ export class UserController {
     return await this.userService.getAllUsers(page, limit);
   }
 
-  //getuserbyidendpoint
-
   @UseGuards(AuthGuard)
   @Get('me')
   async getMe(@User() user: UserEntity) {
-    return this.userService.getById(user.id);
+    return this.userService.getUser(user.id);
+  }
+
+  @UseGuards(AuthGuard)
+  @Get(':id')
+  async getById(@Param('id') id: string) {
+    return await this.userService.getUser(id);
   }
 }
