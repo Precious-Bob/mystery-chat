@@ -8,6 +8,7 @@ import { EmailModule } from './email/email.module';
 import { UserModule } from './user/user.module';
 import { MessageModule } from './message/message.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -35,6 +36,12 @@ import { ScheduleModule } from '@nestjs/schedule';
     EmailModule,
     UserModule,
     MessageModule,
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 10,
+      },
+    ]),
   ],
   controllers: [AppController],
   providers: [AppService],
