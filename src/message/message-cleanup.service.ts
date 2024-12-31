@@ -13,10 +13,10 @@ export class MessageCleanupService {
     private readonly messageRepo: Repository<MessageEntity>,
   ) {}
 
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  @Cron(CronExpression.EVERY_30_SECONDS)
   async deleteExpiredMessages() {
     const threeDaysAgo = new Date();
-    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+    threeDaysAgo.setDate(threeDaysAgo.getDate() - 2);
     try {
       const result = await this.messageRepo.delete({
         createdAt: LessThan(threeDaysAgo),
