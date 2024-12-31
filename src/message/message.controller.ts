@@ -26,7 +26,7 @@ export class MessageController {
 
   @Get('myInbox')
   @UseGuards(AuthGuard)
-  async getInbox(@User() user) {
+  async getInbox(@User() user: any) {
     const userId = user.sub;
     if (!userId) {
       throw new UnauthorizedException('User ID is missing');
