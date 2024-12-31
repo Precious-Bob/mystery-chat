@@ -44,11 +44,10 @@ export class AuthService {
         ...dto,
         profileSlugOrLink,
       });
-      await user.save();
+      await this.userRepo.save(user);
 
       const token = await this.signToken(user.id, user.email);
       await this.emailservice.sendWelcomeMail(user);
-      console.log({ user });
       return { message: 'Successfully signed up', token };
     } catch (e) {
       if (e.code === '23505') {
@@ -166,4 +165,9 @@ export class AuthService {
       throw new UnauthorizedException('Invalid refresh token', e);
     }
   }
+
+  // async logout(token: string) {
+  //   // Implement token blacklist logic
+  //   return { message: 'Successfully logged out' };
+  // }
 }

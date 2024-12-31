@@ -1,6 +1,7 @@
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 import { AbstractEntity } from './abstract.entity';
 import { Exclude } from 'class-transformer';
+import { MessageEntity } from './message.entity';
 
 @Entity()
 export class UserEntity extends AbstractEntity {
@@ -22,4 +23,7 @@ export class UserEntity extends AbstractEntity {
 
   @Column({ nullable: true })
   resetTokenExpires: Date;
+
+  @OneToMany(() => MessageEntity, (message) => message.recipient)
+  receivedMessages: MessageEntity[];
 }

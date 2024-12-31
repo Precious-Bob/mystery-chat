@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
+import { createPaginationLinks } from 'src/utils/paginationLink.util';
 
 @Injectable()
 export class UserService {
@@ -19,7 +20,7 @@ export class UserService {
     };
   }
 
-  async getByProfile(id: string) {
+  async getUser(id: string) {
     try {
       const data = await this.userRepo.findOne({
         where: { id },
@@ -39,9 +40,18 @@ export class UserService {
     }
   }
 
-  //test
-  async getAllUsers() {
-    const data = await this.userRepo.find();
-    return { message: 'success', length: data.length, data };
+  async getAllUsers(page = 1, limit = 10) {
+    const [data, total] = await this.userRepo.findAndCount({
+      skip: page > 0 ? (page - 1) * limit : 0,
+      take: limit,
+    });
+    const links = createPaginationLinks(page, limit, total, 'users');
+    return {
+      total,
+      page,
+      limit,
+      data,
+      links,
+    };
   }
 }
