@@ -2,12 +2,10 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MessageEntity } from 'src/entities/message.entity';
 import { UserEntity } from 'src/entities/user.entity';
-import { createPaginationLinks } from 'src/utils/paginationLink.util';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -19,7 +17,14 @@ export class MessageService {
     private readonly userRepo: Repository<UserEntity>,
   ) {}
 
-  // recipient = recipientProfileSlug
+  /**
+   * Sends a message to a recipient identified by profileSlugOrLink.
+   * @param {string} profileSlugOrLink - The profile slug or link of the recipient.
+   * @param {string} content - The content of the message.
+   * @returns {Promise<Object>} - The response object containing the message details.
+   * @throws {NotFoundException} - If the recipient is not found.
+   * @throws {BadRequestException} - If the message content is invalid.
+   */
   async sendMessage(profileSlugOrLink: string, content: string) {
     const recipient = await this.userRepo.findOne({
       where: { profileSlugOrLink },
@@ -36,6 +41,7 @@ export class MessageService {
         'Message content cannot be longer than 500 characters',
       );
 
+    // Create and save message
     const msg = this.messageRepo.create({
       content,
       recipient,
@@ -43,6 +49,7 @@ export class MessageService {
 
     const data = await this.messageRepo.save(msg);
     const msgResponse = {
+      message: 'success',
       id: data.id,
       content: data.content,
       createdAt: data.createdAt,
@@ -56,42 +63,17 @@ export class MessageService {
     return { message: 'success', data: msgResponse };
   }
 
-  async getInbox(userId: string, page = 1, limit = 10) {
-    if (!userId) throw new UnauthorizedException('User ID is required');
-
-    const [data, total] = await this.messageRepo.findAndCount({
-      where: {
-        recipient: { id: userId },
-      },
+  /**
+   * Retrieves the inbox messages for a user.
+   * @param {string} id - The ID of the user.
+   * @returns {Promise<Object>} - The response object containing the messages.
+   */
+  async getInbox(id: string) {
+    const messages = await this.messageRepo.find({
+      where: { recipient: { id } },
       order: { createdAt: 'DESC' },
-      skip: page > 0 ? (page - 1) * limit : 0,
-      take: limit,
     });
-
-    const msg = total > 0 ? 'Messages retrieved' : 'No messages yet';
-    const links = createPaginationLinks(page, limit, total, 'messages');
-    return {
-      total,
-      page,
-      limit,
-      msg,
-      data,
-      links,
-    };
-  }
-  async deleteMessage(msgId: string, userId: string) {
-    const message = await this.messageRepo.findOne({
-      where: {
-        id: msgId,
-        recipient: { id: userId },
-      },
-      relations: ['recipient'],
-    });
-
-    if (!message)
-      throw new NotFoundException(
-        `Message not found or you don't have permission to delete it!`,
-      );
-    await this.messageRepo.remove(message);
+    const msg = messages.length > 0 ? 'Messages retrieved' : 'No messages yet';
+    return { message: 'success', length: messages.length, data: msg };
   }
 }

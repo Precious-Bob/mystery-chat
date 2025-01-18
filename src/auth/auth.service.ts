@@ -31,6 +31,13 @@ export class AuthService {
     private readonly plg: ProfileLinkGenerator,
   ) {}
 
+  /**
+   * Signs up a new user.
+   * @param {SignupDto} dto - The signup data transfer object.
+   * @returns {Promise<Object>} - The response object containing the signup details.
+   * @throws {BadRequestException} - If passwords do not match.
+   * @throws {ConflictException} - If credentials already exist.
+   */
   async signup(dto: SignupDto) {
     try {
       if (dto.password !== dto.confirmPassword) {
@@ -57,6 +64,12 @@ export class AuthService {
     }
   }
 
+  /**
+   * Signs in a user.
+   * @param {SigninDto} dto - The signin data transfer object.
+   * @returns {Promise<Object>} - The response object containing the signin details.
+   * @throws {NotFoundException} - If credentials are incorrect.
+   */
   async signin({ email, password }: SigninDto) {
     try {
       const user = await this.userRepo.findOne({ where: { email } });
@@ -71,6 +84,12 @@ export class AuthService {
     }
   }
 
+  /**
+   * Initiates the forgot password process.
+   * @param {ForgotPasswordDto} dto - The forgot password data transfer object.
+   * @returns {Promise<void>}
+   * @throws {NotFoundException} - If credentials are incorrect.
+   */
   async forgotPassword({ email }: ForgotPasswordDto): Promise<void> {
     const user = await this.userRepo.findOne({ where: { email } });
     if (!user) throw new NotFoundException('credentials incorrect');
@@ -97,6 +116,13 @@ export class AuthService {
     console.log(resetLink);
   }
 
+  /**
+   * Resets the user's password.
+   * @param {ResetPasswordDto} dto - The reset password data transfer object.
+   * @returns {Promise<Object>} - The response object containing the reset password details.
+   * @throws {NotFoundException} - If credentials are incorrect.
+   * @throws {UnauthorizedException} - If the reset token has expired.
+   */
   async resetPassword({ token, newPassword }: ResetPasswordDto) {
     try {
       // Verify the token
@@ -123,6 +149,12 @@ export class AuthService {
     }
   }
 
+  /**
+   * Signs a JWT token for the user.
+   * @param {string} userId - The ID of the user.
+   * @param {string} email - The email of the user.
+   * @returns {Promise<Object>} - The response object containing the access and refresh tokens.
+   */
   async signToken(
     userId: string,
     email: string,
@@ -147,6 +179,12 @@ export class AuthService {
     };
   }
 
+  /**
+   * Refreshes the JWT token.
+   * @param {string} token - The refresh token.
+   * @returns {Promise<Object>} - The response object containing the new access and refresh tokens.
+   * @throws {UnauthorizedException} - If the refresh token is invalid.
+   */
   async refreshToken(
     token: string,
   ): Promise<{ access_token: string; refresh_token: string }> {

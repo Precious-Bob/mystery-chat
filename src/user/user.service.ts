@@ -13,6 +13,10 @@ export class UserService {
     private readonly config: ConfigService,
   ) {}
 
+  /**
+   * Placeholder method for creating a user.
+   * @returns {Object} - The response object indicating the route is not defined.
+   */
   async createUser() {
     return {
       status: 'error',
@@ -20,6 +24,12 @@ export class UserService {
     };
   }
 
+  /**
+   * Retrieves a user by ID.
+   * @param {string} id - The ID of the user.
+   * @returns {Promise<Object>} - The response object containing the user details.
+   * @throws {NotFoundException} - If the user is not found.
+   */
   async getUser(id: string) {
     try {
       const data = await this.userRepo.findOne({
@@ -40,6 +50,12 @@ export class UserService {
     }
   }
 
+  /**
+   * Retrieves all users with pagination.
+   * @param {number} [page=1] - The page number.
+   * @param {number} [limit=10] - The number of users per page.
+   * @returns {Promise<Object>} - The response object containing the users and pagination details.
+   */
   async getAllUsers(page = 1, limit = 10) {
     const [data, total] = await this.userRepo.findAndCount({
       skip: page > 0 ? (page - 1) * limit : 0,

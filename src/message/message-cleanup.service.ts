@@ -13,6 +13,10 @@ export class MessageCleanupService {
     private readonly messageRepo: Repository<MessageEntity>,
   ) {}
 
+  /**
+   * Deletes expired messages older than three days.
+   * This method runs every 30 seconds.
+   */
   @Cron(CronExpression.EVERY_30_SECONDS)
   async deleteExpiredMessages() {
     const threeDaysAgo = new Date();
