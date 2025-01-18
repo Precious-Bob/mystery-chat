@@ -10,15 +10,15 @@ import { JwtService, TokenExpiredError } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UserEntity } from 'src/entities/user.entity';
+import { UserEntity } from '../entities/user.entity';
 import {
   SigninDto,
   SignupDto,
   ForgotPasswordDto,
   ResetPasswordDto,
 } from 'src/dto';
-import { EmailService } from 'src/email/email.service';
-import { ProfileLinkGenerator } from 'src/user/profileSlugOrLink.service';
+import { EmailService } from '../email/email.service';
+import { ProfileLinkGenerator } from '../user/profileSlugOrLink.service';
 
 @Injectable()
 export class AuthService {
